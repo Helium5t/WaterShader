@@ -7,23 +7,30 @@
 #define WAVE_STATIC
 #endif 
 
+#ifdef DEBUG_MODE
+    #define H_TIME _DebugTime //(100000 * _DebugTime)
+#else
+    #define H_TIME _Time
+#endif
+
 float WaveFunctionSine(float ampli, float2 p, float2 waveDir, float freq, float phase){
     float frontProj = p.x * waveDir.x + p.y * waveDir.y;
-    return ampli * sin(frontProj * freq + phase * _Time.y);
+    return ampli * sin(frontProj * freq + phase * H_TIME.y);
 }
 float2 WaveFunctionSineDer(float ampli, float2 p, float2 waveDir, float freq, float phase){
     float frontProj = p.x * waveDir.x + p.y * waveDir.y;
-    float wfd = ampli * freq * cos(frontProj * freq + phase * _Time.y);
+    float wfd = ampli * freq * cos(frontProj * freq + phase * H_TIME.y);
     return wfd * waveDir;
 }
 
 float WaveFunctionExpSine(float ampli, float2 p, float2 waveDir, float freq, float phase){
     float frontProj = p.x * waveDir.x + p.y * waveDir.y;
-    return ampli * exp( sin(frontProj * freq + phase * _Time.y) - 1);
+    return ampli * exp( sin(frontProj * freq + phase * H_TIME.y) - 1) ;
 }
 float2 WaveFunctionExpSineDer(float ampli, float2 p, float2 waveDir, float freq, float phase){
     float frontProj = p.x * waveDir.x + p.y * waveDir.y;
-    float wfd = exp(sin(frontProj * freq + phase * _Time.y) - 1) * ampli * freq * cos(frontProj * freq + phase * _Time.y);
+    float2 wfd = ampli * exp(sin(frontProj * freq + phase * H_TIME.y) - 1) * cos(frontProj * freq + phase * H_TIME.y) * freq;
+    wfd *= waveDir;
     return waveDir * wfd;
 }
 
@@ -69,10 +76,14 @@ struct WaveInfo{
     }
 #elif defined(WAVE_BROWNIAN)
 
-    #define AMPLI_F 0.78
-    #define FREQ_F 1.15
+    #ifndef AMPLI_F
+    #define AMPLI_F 0.95
+    #endif
+    #ifndef FREQ_F
+    #define FREQ_F 1.025
+    #endif
     
-    WaveInfo GetWave(int s, int i, float maxF, float maxA, float maxP){
+    WaveInfo GetWave(int s, int i, float maxF, float maxA, float maxP, int lacunarity){
         WaveInfo w;
         w.dir = float2(0,0);
         int state = generate(s);
@@ -81,8 +92,11 @@ struct WaveInfo{
         w.dir.y = state /4294967296.0;
         w.dir = normalize(w.dir);
         w.phase = maxP;
-        w.freq =  maxF * pow(FREQ_F, i);
-        w.ampli = maxA * pow(AMPLI_F, i) * (1-(AMPLI_F * 0.99));
+        w.freq =  maxF * pow(FREQ_F, i * lacunarity);
+        w.ampli = maxA * pow(AMPLI_F,i * lacunarity);
+        if (i == 33){
+            w.ampli = 0;
+        }
         w.state = state;
         return w;
     }

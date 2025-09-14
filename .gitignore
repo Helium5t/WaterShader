@@ -1,6 +1,6 @@
 
 # Pesky MacOS FS files 
-*/.DS_Store
+*.DS_Store
 
 ########## ADDED BY HELIUM5T ##########
 # Makes the repo only code focused, ignores the rest. (Also imports, so beware!)
