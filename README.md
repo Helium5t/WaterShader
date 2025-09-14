@@ -13,5 +13,5 @@ Implements both static and Fractional Brownian Motion generation with different 
  - Debug : If activated the waves will not follow `_Time` progression from unity and will instead follow the `Wave Progression` parameter from the Editor.
 
 ## Nota Bene ##
- - For storage purposes the repository is missing the `Assets/SkyboxCubemap.cubemap` asset which can be generated via any of the `Waves.cs` components attached to each plane in the scene.
+ - Since it's dynamically generated, the repository is missing the `Assets/SkyboxCubemap.cubemap` asset which can be generated via any of the `Waves.cs` components attached to each plane in the scene.
  - No Cubemap is provided to the `TextureSkybox.mat` material used for the sky, the one used in the sample is `CoriolisNight4k` from the [Asset Store](https://assetstore.unity.com/packages/2d/textures-materials/sky/skybox-series-free-103633#content) with some manual adjustments. 

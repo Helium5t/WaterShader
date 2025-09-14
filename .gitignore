@@ -1,8 +1,13 @@
 
-# Pesky MacOS FS files 
-*.DS_Store
 
 ########## ADDED BY HELIUM5T ##########
+# Remove imported packages
+Assets/AllSkyFree/*
+Assets/SkySeries Freebie/*
+# Ignore dynamically generated files 
+Assets/SkyboxCubemap.cubemap
+# Pesky MacOS FS files 
+*.DS_Store
 # Makes the repo only code focused, ignores the rest. (Also imports, so beware!)
 /[Pp]ackages/
 /[Pp]rojectSettings/
