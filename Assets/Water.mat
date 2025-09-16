@@ -11,8 +11,7 @@ Material:
   m_Shader: {fileID: 4800000, guid: cb91dc8d1449744318b04f220dad157b, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
-  - DEBUG_MODE
+  m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -37,24 +36,29 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints:
-    - _BrownianLacunarity: 3
+    - _BrownianLacunarity: 2
     - _WaveNumber: 32
     m_Floats:
     - _DebugTime: 715
-    - _DisplacementScale: 113
+    - _DisplacementScale: 50
+    - _FoamFactor: 1.8
+    - _FoamSharpness: 4.29
+    - _FoamSpecularFactor: 1
     - _NormalAttenuation: 0.06
-    - _NormalContrast: 3.48
+    - _NormalContrast: 1
     - _NormalStrength: 0.35
     - _ReflectionStrength: 2
-    - _SpecularSharpness: 1
+    - _SpecularSharpness: 10.1
+    - _SpecularStrength: 0
     - _StartingAmplitude: 6.51
     - _WaveSize: 0.03
     - _ZWrite: 1
     m_Colors:
     - _AmbientColor: {r: 0.9716981, g: 0.9716981, b: 0.9716981, a: 1}
-    - _BaseColor: {r: 0, g: 1, b: 0.97902083, a: 1}
+    - _BaseColor: {r: 0, g: 0.054902077, b: 1, a: 1}
     - _DebugTime: {r: 344.7, g: 344.7, b: 0, a: 0}
     - _DiffuseReflectance: {r: 1, g: 1, b: 1, a: 1}
-    - _SpecularColor: {r: 1, g: 0, b: 0, a: 1}
+    - _FoamBaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

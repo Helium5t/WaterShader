@@ -16,6 +16,11 @@ public class WaterShaderGUI : ShaderGUI
         FractalBrownianMotion
     }
 
+    enum HeightFunction
+    {
+        ExponentialSine
+    }
+
     enum WaveNumber
     {
         Compile,
@@ -23,6 +28,36 @@ public class WaterShaderGUI : ShaderGUI
     }
     WaveNumber waveNumSelection = WaveNumber.Compile;
     WaveGeneration generationType = WaveGeneration.FractalBrownianMotion;
+    HeightFunction heightFunction = HeightFunction.ExponentialSine;
+
+    string[] defaultUIParameters = {
+        "_SpecularStrength",
+        "_SpecularSharpness",
+        "_AmbientColor",
+        "_CubemapTex",
+        "_FoamBaseColor",
+        "_FoamFactorHeight",
+        "_FoamSharpnessHeight",
+        "_FoamFactorAngle",
+        "_FoamSharpnessAngle",
+        "_NormalContrast",
+        "_FoamSpecularFactor",
+        "_BaseAmplitude",
+        "_BasePhase",
+        "_BaseFrequency",
+        "_PhaseRampMultiplier",
+        "_AmplitudeRampMultiplier",
+        "_FrequencyRampMultiplier",
+        "_WaveSize",
+        "_DisplacementScale",
+        "_MinHeightRemap",
+        "_MaxHeightRemap",
+    };
+
+    string[] expSineParameters = {
+        "_MaxExpMultiplier",
+        "_ExpOffset",
+    };
 
     static bool debugMode = false;
     public override void OnGUI(
@@ -39,19 +74,33 @@ public class WaterShaderGUI : ShaderGUI
     {
         MaterialProperty mainTex = FindProperty("_MainTex");
         MaterialProperty baseColor = FindProperty("_BaseColor");
-        editor.TexturePropertySingleLine(MakeLabel(mainTex, "Diffuse Texture (RGB)"), mainTex, baseColor);
+        editor.TexturePropertySingleLine(MakeLabel("Diffuse Texture"), mainTex, mainTex.textureValue ? null : baseColor);
+        if (mainTex.textureValue)
+        {
+            target.EnableKeyword("DIFFUSE_TEXTURE");
+        }
+        else
+        {
+            target.DisableKeyword("DIFFUSE_TEXTURE");
+        }
         MaterialProperty specularColor = FindProperty("_SpecularColor");
         editor.ColorProperty(specularColor, "Specular");
-        MaterialProperty ambientCubemap = FindProperty("_CubemapTex");
-        editor.TextureProperty(ambientCubemap, "Ambient Cubemap");
-        MaterialProperty specularSharpness = FindProperty("_SpecularSharpness");
-        editor.FloatProperty(specularSharpness, "Reflection Sharpness");
-        MaterialProperty normalAtt = FindProperty("_NormalContrast");
-        editor.FloatProperty(normalAtt, "Normal Contrast");
-        MaterialProperty waveSize = FindProperty("_WaveSize");
-        editor.FloatProperty(waveSize, "Wave Size");
-        MaterialProperty displacement = FindProperty("_DisplacementScale");
-        editor.FloatProperty(displacement, "Displacement Scale");
+        foreach (var s in defaultUIParameters)
+        {
+            MaterialProperty m = FindProperty(s);
+            editor.DefaultShaderProperty(m, m.displayName);
+        }
+        heightFunction = (HeightFunction)EditorGUILayout.EnumPopup(MakeLabel("Height Function"), heightFunction);
+        if (heightFunction == HeightFunction.ExponentialSine)
+        {
+            foreach (var s in expSineParameters)
+            {
+                MaterialProperty m = FindProperty(s);
+                editor.DefaultShaderProperty(m, m.displayName);
+            }
+        }
+
+
         generationType = (WaveGeneration)EditorGUILayout.EnumPopup(MakeLabel("Wave Generation Method"), generationType);
         if (generationType == WaveGeneration.FractalBrownianMotion)
         {
@@ -73,7 +122,7 @@ public class WaterShaderGUI : ShaderGUI
 
     void ShowFractalBrownianUI()
     {
-        MaterialProperty amplitude = FindProperty("_StartingAmplitude");
+        MaterialProperty amplitude = FindProperty("_BaseAmplitude");
         editor.FloatProperty(amplitude, "Starting Amplitude");
         MaterialProperty lacunarity = FindProperty("_BrownianLacunarity");
         EditorGUI.BeginChangeCheck();

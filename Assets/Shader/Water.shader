@@ -2,17 +2,39 @@ Shader "Custom/Water"
 {
     Properties
     {
+        // Shading Parameters
         _MainTex ("Texture", 2D) = "white" {}
         _BaseColor ("Color", Color) = (1,1,1,1)
         _SpecularColor ("Specular Color", Color) = (1,1,1,1)
         _SpecularSharpness ("Reflection Sharpness", Float) = 2
+        _SpecularStrength ("Specular Strength", Float) = 1
+        _AmbientColor ("Ambient Color", Color) = (0.5,0.5,0.5,0.5)
+        _FoamBaseColor ("Foam Base Color", Color ) = (1,1,1,1)
+        _FoamFactorHeight("Height Based Foam Amount", Range(0,1) ) = 1
+        _FoamSharpnessHeight("Height BasedFoam Sharpness", Float) = 1
+        _FoamFactorAngle("Angle Based Foam Amount", Range(0,1) ) = 1
+        _FoamSharpnessAngle("Angle Based Foam Sharpness", Float) = 1
+        _FoamSpecularFactor ("Foam Specular Multiplier", Float) = 1
         _NormalContrast("Normal Contrast", Float) = 1
+        _MinHeightRemap("Height Remapping Minimum", Range(0,1)) = 0
+        _MaxHeightRemap("Height Remapping Maximum", Range(0,1)) = 1
+        [NoScaleOffset] _CubemapTex ("Reflection Cubemap", Cube) = "grey" {}
+        // Generation Parameters
         _WaveSize ("Wave Size", Float) = 1
         _DisplacementScale ("Displacement Scale", Float) = 1
-        _StartingAmplitude("Starting Amplitude", Float) = 1
-        _BrownianLacunarity("Lacunarity", Integer) = 1
         _WaveNumber("Wave Number", Integer) = 1
-        [NoScaleOffset] _CubemapTex ("Cubemap   (HDR)", Cube) = "grey" {}
+        // FBM Generation Parameters
+        _BaseAmplitude("Starting Amplitude", Float) = 1
+        _BasePhase ("Starting Phase", Float) = 1
+        _BaseFrequency ("Starting Frequency", Float) = 1
+        _PhaseRampMultiplier("Phase Ramp Multiplier", Float) = 1
+        _AmplitudeRampMultiplier("Amplitude Ramp Multiplier", Float) = 1
+        _FrequencyRampMultiplier("Frequency Ramp Multiplier", Float) = 1
+        _BrownianLacunarity("Lacunarity", Integer) = 1
+        // ExpSine specific parameters
+        _MaxExpMultiplier("Max Exponential Multiplier", Float) = 1
+        _ExpOffset("Exponential Negative Offset", Float) = 1
+        // Debug Parameters 
         _DebugTime("Time Debug", Vector) = (1,1,1,1)
     }
     SubShader
@@ -37,6 +59,7 @@ Shader "Custom/Water"
         
         #pragma multi_compile DIRECTIONAL POINT
 
+        #pragma shader_feature _ DIFFUSE_TEXTURE
         #pragma shader_feature _ DEBUG_MODE
 
         #pragma shader_feature _ DYNAMIC_WAVE_NUM
@@ -46,6 +69,12 @@ Shader "Custom/Water"
             float2 _DebugTime;
         #endif
 
+
+        #if defined(SUM_OF_SINES)
+            #define ComputeDisplacement(a,p,w,f,ph) WaveFunctionExpSine(a,p,w,f,ph, _MaxExpMultiplier, _ExpOffset)
+            #define ComputeDerivative(a,p,w,f,ph) WaveFunctionExpSineDer(a,p,w,f,ph, _MaxExpMultiplier, _ExpOffset)
+        #endif
+
         #include "UnityPBSLighting.cginc"
         #include "AutoLight.cginc"
         #include "LightingModels.cginc"
@@ -53,15 +82,7 @@ Shader "Custom/Water"
         #include "WaveGeneration.cginc"
         
 
-        #if defined(SUM_OF_SINES)
-            #define ComputeDisplacement WaveFunctionExpSine
-            #define ComputeDerivative WaveFunctionExpSineDer
-        #endif
         
-        #if defined(WAVE_BROWNIAN)
-                static const float phase = 1.7;
-                static const float freq = 0.7;
-        #endif
 
         #ifdef DYNAMIC_WAVE_NUM
             int _WaveNumber;
@@ -98,10 +119,30 @@ Shader "Custom/Water"
 
             sampler2D _MainTex;
             samplerCUBE _CubemapTex;
-            float4 _BaseColor;
+            float4 _BaseColor, _FoamBaseColor;
             float4 _MainTex_ST;
-            float _SpecularSharpness,_WaveSize, _NormalContrast, _StartingAmplitude, _DisplacementScale;
-            float3 _SpecularColor, _DiffuseColor;
+            float   _SpecularSharpness,
+                    _WaveSize,
+                    _NormalContrast, 
+                    _BaseAmplitude, 
+                    _DisplacementScale, 
+                    _FoamFactorHeight,
+                    _FoamFactorAngle, 
+                    _FoamSharpnessAngle,
+                    _FoamSharpnessHeight,
+                    _FoamSpecularFactor,
+                    _SpecularStrength,
+                    _BasePhase,
+                    _BaseFrequency,
+                    _PhaseRampMultiplier,
+                    _AmplitudeRampMultiplier,
+                    _FrequencyRampMultiplier,
+                    _MaxExpMultiplier,
+                    _ExpOffset,
+                    _MinHeightRemap,
+                    _MaxHeightRemap;
+            float3 _SpecularColor, _AmbientColor;
+
             int _BrownianLacunarity;
 
             v2f vert (appdata v)
@@ -118,8 +159,8 @@ Shader "Custom/Water"
                 for (int i = 0 ; i < WAVE_ITER; i++){
                     #if defined(WAVE_BROWNIAN)
 
-                    float ampli = _StartingAmplitude;
-                    WaveInfo w = GetWave(x, i, freq, ampli, phase, _BrownianLacunarity);
+                    float ampli = _BaseAmplitude;
+                    WaveInfo w = GetWave(x, i, _BaseFrequency, ampli, _BasePhase, _BrownianLacunarity, _AmplitudeRampMultiplier, _FrequencyRampMultiplier, _PhaseRampMultiplier);
                     x = w.state;
                     ampliSum += w.ampli;
                     #else
@@ -139,11 +180,11 @@ Shader "Custom/Water"
                     #endif
                 }
                 p.y /= ampliSum;
+                o.h = p.y;
                 p.y -= 0.5;
                 p.y *= _DisplacementScale;
 
                 v.vertex.y =  p.y;
-                o.h = p.y;
                 o.n = v.n;
                 o.wPos = mul(unity_ObjectToWorld, v.vertex);
                 o.uv = v.uv;
@@ -162,44 +203,61 @@ Shader "Custom/Water"
                 float2 d = normalize(float2(1,1));
                 float2 der = float2(0,0);
                 float ampliSum;
+                float maxAmpliSum;
+                float hDebug = 0;
                 
                 for (int idx = 0 ; idx < WAVE_ITER; idx++){
                     #if defined(WAVE_BROWNIAN)
-                    float ampli = _StartingAmplitude;
-                    WaveInfo w = GetWave(x, idx, freq, ampli, phase, _BrownianLacunarity);
+                    float ampli = _BaseAmplitude;
+                    WaveInfo w = GetWave(x, idx, _BaseFrequency, ampli, _BasePhase, _BrownianLacunarity, _AmplitudeRampMultiplier, _FrequencyRampMultiplier, _PhaseRampMultiplier);
                     ampliSum += w.ampli;
+                    maxAmpliSum += w.ampli * exp(_MaxExpMultiplier - _ExpOffset);
                     x = w.state;
                     #else
                     if(idx>2) break;
                     WaveInfo w = GetWave(idx);
                     #endif
                     d = w.dir;
-
+                    
                     #if defined(WAVE_BROWNIAN) && defined(BROWNIAN_DOMAIN_WARPING)
                     der = ComputeDerivative(w.ampli, p.xz + der, d,  w.freq, w.phase);
                     #else
                     der = ComputeDerivative(w.ampli, p.xz, d,  w.freq, w.phase);
                     #endif
+                    hDebug += ComputeDisplacement(w.ampli, p.xz + der, d, w.freq, w.phase);
                     n.x += der.x;
                     n.z += der.y;
                 }
                 n/= ampliSum;
                 n = normalize(float3(-n.x, 1/_NormalContrast, -n.z ));
-
-                fixed4 diffuseCol = tex2D(_MainTex, i.uv) * _BaseColor;
+                // Foam Computation
+                // Create Foam on tallest waves
+                float height =saturate(i.h/maxAmpliSum);
+                height =  (height-_MinHeightRemap)/(_MaxHeightRemap-_MinHeightRemap);
+                height = saturate((height - 1 + _FoamFactorHeight) / _FoamFactorHeight);
+                height = pow(height, _FoamSharpnessHeight);
+                // Create foam at sharp angles
+                float foamAngle = DotClamped(float3(0,1,0), n);
+                foamAngle = saturate((foamAngle -1 + _FoamFactorAngle) / _FoamFactorAngle);
+                foamAngle = lerp(height,pow(foamAngle, _FoamSharpnessAngle), height);
+                height = max(height, foamAngle);
+                
+                #ifdef DIFFUSE_TEXTURE
+                float4 diffuseCol = tex2D(_MainTex, i.uv) + lerp(0, _FoamBaseColor, height);
+                #else
+                float4 diffuseCol = _BaseColor + lerp(0, _FoamBaseColor, height);
+                #endif
                 float3 lDir =  _WorldSpaceLightPos0.xyz;
                 float4 lColor = _LightColor0;
                 float3 diffuse = BlinnPhongDiffuse(i.wPos, n, diffuseCol, lDir, 0, lColor.xyz, 0);
                 float3 lookDir = normalize(-i.wPos + _WorldSpaceCameraPos);
-                float3 aDir = normalize(reflect(lookDir, n));
-                // aDir.y = step(0, aDir.y) * aDir.y;
-                float3 ambientColor =  texCUBE(_CubemapTex, n).xyz * 0;
-                float3 spec = BlinnPhongSpecularFromCubemap(i.wPos, n, lDir, 0, lColor.xyz, 1, _SpecularSharpness, _CubemapTex);
+                float schlickFresnel = pow(1 - DotClamped(lookDir, n), 5);
+                float3 ambientColor =  _AmbientColor;
+                float3 spec = schlickFresnel * _SpecularStrength * BlinnPhongSpecularFromCubemap(i.wPos, n, lDir, 0, lColor.xyz, 1, _SpecularSharpness, _CubemapTex, _SpecularColor);
                 // return float4(diffuse,1);
                 // return float4(spec,1);
-                // return float4(ambientColor,1) * step(0,n.y);
+                // return float4(ambientColor,1);
                 // return float4(diffuse,1);
-                // return UNITY_LIGHTMODEL_AMBIENT;
                 float4 finalColor = float4(saturate(ambientColor+ diffuse + spec),1.0);
                 UNITY_APPLY_FOG(i.fogCoord, finalColor);
                 return finalColor;
