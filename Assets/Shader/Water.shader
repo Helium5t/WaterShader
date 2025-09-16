@@ -154,6 +154,20 @@ Shader "Custom/Water"
                 float2 der = 0;
                 int x = RAND_SEED;
                 float ampliSum;
+
+
+                float rotT = 80 * (PI / 180);
+                float bigWaveFreq = 0.07;
+                float bigWavePhase =0.7;
+                float2 bigWaveDir1 = normalize(float2(sin(rotT ),cos(rotT)));
+                float fp = dot(bigWaveDir1, p.xz);
+                float fx = bigWaveFreq * fp + bigWavePhase * _Time.y ;
+                rotT += PI*7.1/2;
+                float2 bigWaveDir2 = normalize(float2(sin(rotT),cos(rotT)));
+                fp = dot(bigWaveDir2, p.xz);
+                float fy = bigWaveFreq * fp + bigWavePhase * 1.7 * _Time.y ;
+                float mult = clamp((sin(fx) + sin(fy) + 2)*0.5,0,1);
+                float2 multDer =   cos(fx) * fp + fp * cos(fy);
                 for (int i = 0 ; i < WAVE_ITER; i++){
                     #if defined(WAVE_BROWNIAN)
 
@@ -171,17 +185,24 @@ Shader "Custom/Water"
                     d = w.dir;
                     d = normalize(d);
                     #if defined(WAVE_BROWNIAN) && defined(BROWNIAN_DOMAIN_WARPING)
-                    p.y += ComputeDisplacement(w.ampli, p.xz + der, d, w.freq, w.phase);
+                    float displ = ComputeDisplacement(w.ampli, p.xz + der, d, w.freq, w.phase);
+                    p.y += displ;
+                    // p.y +=  * displ;
                     der = ComputeDerivative(w.ampli, p.xz + der, d,  w.freq, w.phase);
+                    // der = mult * der + multDer + displ;
                     #else
                     p.y += ComputeDisplacement(w.ampli, p.xz, d, w.freq, w.phase);
                     #endif
-                }
-                p.y /= ampliSum;
-                o.h = p.y;
-                p.y -= 0.5;
-                p.y *= _DisplacementScale;
 
+
+                }
+                mult = step(0.0001, abs(mult)) * mult + (1-step(0.0001, abs(mult))) * 0.0001;
+                p.y /= ampliSum;
+                p.y *= mult;
+                o.h = p.y ;
+                p.y -= 0.5;
+                p.y *= _DisplacementScale ;
+                
                 v.vertex.y =  p.y;
                 o.n = v.n;
                 o.wPos = mul(unity_ObjectToWorld, v.vertex);
