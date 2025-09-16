@@ -23,13 +23,13 @@ float2 WaveFunctionSineDer(float ampli, float2 p, float2 waveDir, float freq, fl
     return wfd * waveDir;
 }
 
-float WaveFunctionExpSine(float ampli, float2 p, float2 waveDir, float freq, float phase){
+float WaveFunctionExpSine(float ampli, float2 p, float2 waveDir, float freq, float phase, float maxValue, float offset){
     float frontProj = p.x * waveDir.x + p.y * waveDir.y;
-    return ampli * exp( sin(frontProj * freq + phase * H_TIME.y) - 1) ;
+    return ampli * exp( (maxValue * sin(frontProj * freq + phase * H_TIME.y)) - offset) ;
 }
-float2 WaveFunctionExpSineDer(float ampli, float2 p, float2 waveDir, float freq, float phase){
+float2 WaveFunctionExpSineDer(float ampli, float2 p, float2 waveDir, float freq, float phase, float maxValue, float offset){
     float frontProj = p.x * waveDir.x + p.y * waveDir.y;
-    float2 wfd = ampli * exp(sin(frontProj * freq + phase * H_TIME.y) - 1) * cos(frontProj * freq + phase * H_TIME.y) * freq;
+    float2 wfd = ampli * exp((maxValue * sin(frontProj * freq + phase * H_TIME.y)) - offset) * maxValue * cos(frontProj * freq + phase * H_TIME.y) * freq;
     wfd *= waveDir;
     return waveDir * wfd;
 }
@@ -83,7 +83,7 @@ struct WaveInfo{
     #define FREQ_F 1.025
     #endif
     
-    WaveInfo GetWave(int s, int i, float maxF, float maxA, float maxP, int lacunarity){
+    WaveInfo GetWave(int s, int i, float maxF, float maxA, float maxP, int lacunarity, float aRamp, float fRamp, float pRamp){
         WaveInfo w;
         w.dir = float2(0,0);
         int state = generate(s);
@@ -91,9 +91,9 @@ struct WaveInfo{
         state = generate(s);
         w.dir.y = state /4294967296.0;
         w.dir = normalize(w.dir);
-        w.phase = maxP;
-        w.freq =  maxF * pow(FREQ_F, i * lacunarity);
-        w.ampli = maxA * pow(AMPLI_F,i * lacunarity);
+        w.phase = maxP * pow(pRamp, i * lacunarity);
+        w.freq =  maxF * pow(fRamp, i * lacunarity);
+        w.ampli = maxA * pow(aRamp,i * lacunarity);
         if (i == 33){
             w.ampli = 0;
         }
