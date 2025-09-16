@@ -49,7 +49,7 @@ float3 BlinnPhongSpecular(float3 wPos, float3 wNormal, float3 lDir, float3 light
 	#elif defined(DIRECTIONAL)
 		float3 specular = specularStrength * specularColor * lightColor;
     #else
-        return float3(1,0,1);
+        return float3(1,0,1); // Not supported
 	#endif 
     return specular;
 }

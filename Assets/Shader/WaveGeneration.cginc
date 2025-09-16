@@ -24,11 +24,11 @@ float2 WaveFunctionSineDer(float ampli, float2 p, float2 waveDir, float freq, fl
 }
 
 float WaveFunctionExpSine(float ampli, float2 p, float2 waveDir, float freq, float phase, float maxValue, float offset){
-    float frontProj = p.x * waveDir.x + p.y * waveDir.y;
+    float frontProj = dot(p,waveDir);
     return ampli * exp( (maxValue * sin(frontProj * freq + phase * H_TIME.y)) - offset) ;
 }
 float2 WaveFunctionExpSineDer(float ampli, float2 p, float2 waveDir, float freq, float phase, float maxValue, float offset){
-    float frontProj = p.x * waveDir.x + p.y * waveDir.y;
+    float frontProj = dot(p,waveDir);
     float2 wfd = ampli * exp((maxValue * sin(frontProj * freq + phase * H_TIME.y)) - offset) * maxValue * cos(frontProj * freq + phase * H_TIME.y) * freq;
     wfd *= waveDir;
     return waveDir * wfd;

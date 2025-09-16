@@ -90,6 +90,16 @@ public class WaterShaderGUI : ShaderGUI
             MaterialProperty m = FindProperty(s);
             editor.DefaultShaderProperty(m, m.displayName);
         }
+        MaterialProperty cubemapTexture = FindProperty("_CubemapTex");
+        if (cubemapTexture.textureValue)
+        {
+            target.EnableKeyword("SPECULAR_CUBEMAP");
+        }
+        else
+        {
+            target.DisableKeyword("SPECULAR_CUBEMAP");
+        }
+
         heightFunction = (HeightFunction)EditorGUILayout.EnumPopup(MakeLabel("Height Function"), heightFunction);
         if (heightFunction == HeightFunction.ExponentialSine)
         {

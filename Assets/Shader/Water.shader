@@ -60,6 +60,7 @@ Shader "Custom/Water"
         #pragma multi_compile DIRECTIONAL POINT
 
         #pragma shader_feature _ DIFFUSE_TEXTURE
+        #pragma shader_feature _ SPECULAR_CUBEMAP
         #pragma shader_feature _ DEBUG_MODE
 
         #pragma shader_feature _ DYNAMIC_WAVE_NUM
@@ -80,9 +81,6 @@ Shader "Custom/Water"
         #include "LightingModels.cginc"
         #include "HeliumUtils.cginc" 
         #include "WaveGeneration.cginc"
-        
-
-        
 
         #ifdef DYNAMIC_WAVE_NUM
             int _WaveNumber;
@@ -203,15 +201,12 @@ Shader "Custom/Water"
                 float2 d = normalize(float2(1,1));
                 float2 der = float2(0,0);
                 float ampliSum;
-                float maxAmpliSum;
-                float hDebug = 0;
                 
                 for (int idx = 0 ; idx < WAVE_ITER; idx++){
                     #if defined(WAVE_BROWNIAN)
                     float ampli = _BaseAmplitude;
                     WaveInfo w = GetWave(x, idx, _BaseFrequency, ampli, _BasePhase, _BrownianLacunarity, _AmplitudeRampMultiplier, _FrequencyRampMultiplier, _PhaseRampMultiplier);
                     ampliSum += w.ampli;
-                    maxAmpliSum += w.ampli * exp(_MaxExpMultiplier - _ExpOffset);
                     x = w.state;
                     #else
                     if(idx>2) break;
@@ -224,7 +219,6 @@ Shader "Custom/Water"
                     #else
                     der = ComputeDerivative(w.ampli, p.xz, d,  w.freq, w.phase);
                     #endif
-                    hDebug += ComputeDisplacement(w.ampli, p.xz + der, d, w.freq, w.phase);
                     n.x += der.x;
                     n.z += der.y;
                 }
@@ -232,7 +226,7 @@ Shader "Custom/Water"
                 n = normalize(float3(-n.x, 1/_NormalContrast, -n.z ));
                 // Foam Computation
                 // Create Foam on tallest waves
-                float height =saturate(i.h/maxAmpliSum);
+                float height =saturate(i.h/ampliSum);
                 height =  (height-_MinHeightRemap)/(_MaxHeightRemap-_MinHeightRemap);
                 height = saturate((height - 1 + _FoamFactorHeight) / _FoamFactorHeight);
                 height = pow(height, _FoamSharpnessHeight);
@@ -243,21 +237,23 @@ Shader "Custom/Water"
                 height = max(height, foamAngle);
                 
                 #ifdef DIFFUSE_TEXTURE
-                float4 diffuseCol = tex2D(_MainTex, i.uv) + lerp(0, _FoamBaseColor, height);
+                    float4 diffuseCol = tex2D(_MainTex, i.uv) + lerp(0, _FoamBaseColor, height);
                 #else
-                float4 diffuseCol = _BaseColor + lerp(0, _FoamBaseColor, height);
+                    float4 diffuseCol = _BaseColor + lerp(0, _FoamBaseColor, height);
                 #endif
+
                 float3 lDir =  _WorldSpaceLightPos0.xyz;
                 float4 lColor = _LightColor0;
                 float3 diffuse = BlinnPhongDiffuse(i.wPos, n, diffuseCol, lDir, 0, lColor.xyz, 0);
                 float3 lookDir = normalize(-i.wPos + _WorldSpaceCameraPos);
                 float schlickFresnel = pow(1 - DotClamped(lookDir, n), 5);
                 float3 ambientColor =  _AmbientColor;
-                float3 spec = schlickFresnel * _SpecularStrength * BlinnPhongSpecularFromCubemap(i.wPos, n, lDir, 0, lColor.xyz, 1, _SpecularSharpness, _CubemapTex, _SpecularColor);
-                // return float4(diffuse,1);
-                // return float4(spec,1);
-                // return float4(ambientColor,1);
-                // return float4(diffuse,1);
+                #ifdef SPECULAR_CUBEMAP
+                    float3 spec = schlickFresnel * _SpecularStrength * BlinnPhongSpecularFromCubemap(i.wPos, n, lDir, 0, lColor.xyz, 1, _SpecularSharpness, _CubemapTex, _SpecularColor);
+                #else 
+                    float3 spec = schlickFresnel * _SpecularStrength * BlinnPhongSpecular(i.wPos, n, lDir, 0, lColor.xyz, 1, _SpecularSharpness, _SpecularColor);
+                #endif
+
                 float4 finalColor = float4(saturate(ambientColor+ diffuse + spec),1.0);
                 UNITY_APPLY_FOG(i.fogCoord, finalColor);
                 return finalColor;
