@@ -26,9 +26,15 @@ public class WaterShaderGUI : ShaderGUI
         Compile,
         Runtime
     }
+    enum SeedMode
+    {
+        Dynamic,
+        Static
+    }
     WaveNumber waveNumSelection = WaveNumber.Compile;
     WaveGeneration generationType = WaveGeneration.FractalBrownianMotion;
     HeightFunction heightFunction = HeightFunction.ExponentialSine;
+    SeedMode seedMode = SeedMode.Static;
 
     string[] defaultUIParameters = {
         "_SpecularStrength",
@@ -126,12 +132,25 @@ public class WaterShaderGUI : ShaderGUI
         {
             target.DisableKeyword("DEBUG_MODE");
         }
-        
-
     }
 
-    void ShowFractalBrownianUI()
+    void DisableAllFBMKeywords()
     {
+        target.DisableKeyword("DYNAMIC_SEED");
+        target.DisableKeyword("DYNAMIC_WAVE_NUM");
+    }
+    void ShowFractalBrownianUI()
+    {   seedMode = (SeedMode) EditorGUILayout.EnumPopup(MakeLabel("Seed Mode"),seedMode);
+        if (seedMode == SeedMode.Dynamic)
+        {
+            target.EnableKeyword("DYNAMIC_SEED");
+            MaterialProperty m = FindProperty("_Seed");
+            editor.DefaultShaderProperty(m, m.displayName);
+        }
+        else
+        {
+            target.DisableKeyword("DYNAMIC_SEED");
+        }
         MaterialProperty amplitude = FindProperty("_BaseAmplitude");
         editor.FloatProperty(amplitude, "Starting Amplitude");
         MaterialProperty lacunarity = FindProperty("_BrownianLacunarity");

@@ -6,7 +6,7 @@ Shader "Custom/Water"
         _MainTex ("Texture", 2D) = "white" {}
         _BaseColor ("Color", Color) = (1,1,1,1)
         _SpecularColor ("Specular Color", Color) = (1,1,1,1)
-        _SpecularSharpness ("Reflection Sharpness", Float) = 2
+        _SpecularSharpness ("Specular Sharpness", Float) = 2
         _SpecularStrength ("Specular Strength", Float) = 1
         _AmbientColor ("Ambient Color", Color) = (0.5,0.5,0.5,0.5)
         _FoamBaseColor ("Foam Base Color", Color ) = (1,1,1,1)
@@ -55,19 +55,24 @@ Shader "Custom/Water"
         #define BROWNIAN_DOMAIN_WARPING
         #define SUM_OF_SINES
         #define DIR_LIGHT
-        #define RAND_SEED 2147483647
         
         #pragma multi_compile DIRECTIONAL POINT
 
         #pragma shader_feature _ DIFFUSE_TEXTURE
         #pragma shader_feature _ SPECULAR_CUBEMAP
         #pragma shader_feature _ DEBUG_MODE
+        #pragma shader_feature _ DYNAMIC_SEED
 
         #pragma shader_feature _ DYNAMIC_WAVE_NUM
 
 
         #ifdef DEBUG_MODE
             float2 _DebugTime;
+        #endif
+
+        #ifdef DYNAMIC_SEED
+            int _Seed;
+            #define RAND_SEED _Seed
         #endif
 
 
@@ -146,7 +151,7 @@ Shader "Custom/Water"
             v2f vert (appdata v)
             {
                 v2f o;
-                float4 p = mul(unity_ObjectToWorld, v.vertex) * _WaveSize;
+                float4 p = mul(unity_ObjectToWorld, v.vertex) / _WaveSize;
                 float2 d = normalize(float2(1,1));
 
 
