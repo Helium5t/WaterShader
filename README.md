@@ -47,8 +47,11 @@ Two shaders are present, one uses classic vertex and fragments shaders to animat
 
  ### Height Function Tessellation ###
  The formula being used is the following:
+
  $$ T = Nyq(p1,p2) \cdot SchlickFresnel(\vec{V}, \vec{N})^{Max}_{Min} \cdot \frac{|p1-p2| - minDist}{maxDist-minDist} \cdot S$$
+
  Where:
+ 
  $$ \begin{aligned}
 & \vec{V} = \text{World Space View Direction} \\ 
 & \vec{N} = \text{World Space Normal} \\ 
