@@ -1,4 +1,7 @@
 # WATER SHADER #
+
+[Visual Samples](./Assets/Visual%20Samples)
+
 Implements both static and Fractional Brownian Motion generation with different sine-based functions to generate a water-like material. 
 Currently only implements displacement by computing sum of sines, but supports multiple height functions (beyond the simple sine) and it can be extended by modifying the `WaveGeneration.cginc`.
 It works generally well for a stylized look, as the mathematical model is not detailed enough to give off proper semblance of tide motions as well as no sophisticated way of computing more turbulent effects (e.g. foam and breaking waves).
