@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: TessellWater
+  m_Shader: {fileID: 4800000, guid: 3d50b7fd8e6144c18af7a677ff1f6fa2, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - HEIGHT_FUNCTION_BASED_TESSELATION
+  - SPECULAR_CUBEMAP
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _CubemapTex:
+        m_Texture: {fileID: 8900000, guid: f5bb90ce5f780489f9bbe302d38d8692, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Tex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints:
+    - _BrownianLacunarity: 1
+    - _Seed: 2147249087
+    - _Subdivs: 3
+    - _WaveNumber: 32
+    m_Floats:
+    - _AmplitudeRampMultiplier: 0.54
+    - _BaseAmplitude: 1
+    - _BaseFrequency: 1
+    - _BaseFrequencyMultiplier: 1
+    - _BasePhase: 1
+    - _BasePhaseMultiplier: 1
+    - _DebugTime: 715
+    - _DerivativeTargetValue: 0
+    - _DisplacementScale: 287.1
+    - _ExpOffset: 1
+    - _FoamFactor: 0.089
+    - _FoamFactorAngle: 0.55
+    - _FoamFactorHeight: 0.866
+    - _FoamSharpness: 1
+    - _FoamSharpnessAngle: -14.83
+    - _FoamSharpnessHeight: 2.47
+    - _FoamSpecularFactor: 1
+    - _FrequencyMultiplier: 0.23
+    - _FrequencyRampMultiplier: 1.43
+    - _MaxDistTessellation: 10000
+    - _MaxEdgeTesselation: 1
+    - _MaxExpMultiplier: 1
+    - _MaxHeightRemap: 0.964
+    - _MinDistTessellation: 0
+    - _MinEdgeTesselation: 1
+    - _MinExpValue: -0.05
+    - _MinHeightRemap: 0.155
+    - _NormalAttenuation: 0.06
+    - _NormalContrast: 1
+    - _NormalStrength: 0.35
+    - _PhaseMultiplier: 1.12
+    - _PhaseRampMultiplier: 1.28
+    - _PhongTesselationFactor: 0
+    - _ReflectionStrength: 2
+    - _SpecularSharpness: 13.54
+    - _SpecularStrength: 1
+    - _StartingAmplitude: 7.98
+    - _Subdivs: 2.1
+    - _TargetEdgeLen: 37.83
+    - _WaveSize: 345.8
+    - _ZWrite: 1
+    m_Colors:
+    - _AmbientColor: {r: 0, g: 0, b: 0, a: 1}
+    - _BaseColor: {r: 0, g: 0.441372, b: 0.5943396, a: 1}
+    - _DebugTime: {r: 420.48, g: 420.48, b: 0, a: 0}
+    - _DiffuseReflectance: {r: 1, g: 1, b: 1, a: 1}
+    - _FoamBaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

@@ -38,6 +38,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints:
     - _BrownianLacunarity: 1
+    - _Seed: 2147249087
+    - _Subdivs: 1
     - _WaveNumber: 32
     m_Floats:
     - _AmplitudeRampMultiplier: 0.54
@@ -47,7 +49,7 @@ Material:
     - _BasePhase: 1
     - _BasePhaseMultiplier: 1
     - _DebugTime: 715
-    - _DisplacementScale: 169.96
+    - _DisplacementScale: 287.1
     - _ExpOffset: 1
     - _FoamFactor: 0.089
     - _FoamFactorAngle: 0.55
@@ -71,7 +73,8 @@ Material:
     - _SpecularSharpness: 6.6
     - _SpecularStrength: 0.68
     - _StartingAmplitude: 7.98
-    - _WaveSize: 0.007
+    - _TargetEdgeLen: 1
+    - _WaveSize: 345.8
     - _ZWrite: 1
     m_Colors:
     - _AmbientColor: {r: 0, g: 0, b: 0, a: 1}

@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class WaterShaderGUI : ShaderGUI
 {
-    Material target;
-    MaterialEditor editor;
-    MaterialProperty[] properties;
+    protected Material target;
+    protected MaterialEditor editor;
+    protected MaterialProperty[] properties;
     static GUIContent staticLabel = new GUIContent();
 
     int waveNumber = 1;
@@ -66,6 +66,7 @@ public class WaterShaderGUI : ShaderGUI
     };
 
     static bool debugMode = false;
+
     public override void OnGUI(
         MaterialEditor editor, MaterialProperty[] properties
     )
@@ -76,7 +77,7 @@ public class WaterShaderGUI : ShaderGUI
         DoMain();
     }
 
-    void DoMain()
+    protected void DoMain()
     {
         MaterialProperty mainTex = FindProperty("_MainTex");
         MaterialProperty baseColor = FindProperty("_BaseColor");
@@ -91,11 +92,7 @@ public class WaterShaderGUI : ShaderGUI
         }
         MaterialProperty specularColor = FindProperty("_SpecularColor");
         editor.ColorProperty(specularColor, "Specular");
-        foreach (var s in defaultUIParameters)
-        {
-            MaterialProperty m = FindProperty(s);
-            editor.DefaultShaderProperty(m, m.displayName);
-        }
+        ShowDefaultUI(defaultUIParameters);
         MaterialProperty cubemapTexture = FindProperty("_CubemapTex");
         if (cubemapTexture.textureValue)
         {
@@ -109,11 +106,7 @@ public class WaterShaderGUI : ShaderGUI
         heightFunction = (HeightFunction)EditorGUILayout.EnumPopup(MakeLabel("Height Function"), heightFunction);
         if (heightFunction == HeightFunction.ExponentialSine)
         {
-            foreach (var s in expSineParameters)
-            {
-                MaterialProperty m = FindProperty(s);
-                editor.DefaultShaderProperty(m, m.displayName);
-            }
+            ShowDefaultUI(expSineParameters);
         }
 
 
@@ -121,6 +114,10 @@ public class WaterShaderGUI : ShaderGUI
         if (generationType == WaveGeneration.FractalBrownianMotion)
         {
             ShowFractalBrownianUI();
+        }
+        else
+        {
+            DisableAllFBMKeywords();
         }
         debugMode = EditorGUILayout.Toggle("Debug", debugMode);
         if (debugMode)
@@ -140,7 +137,8 @@ public class WaterShaderGUI : ShaderGUI
         target.DisableKeyword("DYNAMIC_WAVE_NUM");
     }
     void ShowFractalBrownianUI()
-    {   seedMode = (SeedMode) EditorGUILayout.EnumPopup(MakeLabel("Seed Mode"),seedMode);
+    {
+        seedMode = (SeedMode)EditorGUILayout.EnumPopup(MakeLabel("Seed Mode"), seedMode);
         if (seedMode == SeedMode.Dynamic)
         {
             target.EnableKeyword("DYNAMIC_SEED");
@@ -155,7 +153,7 @@ public class WaterShaderGUI : ShaderGUI
         editor.FloatProperty(amplitude, "Starting Amplitude");
         MaterialProperty lacunarity = FindProperty("_BrownianLacunarity");
         EditorGUI.BeginChangeCheck();
-        int lacunarityV =EditorGUILayout.IntSlider("Lacunarity", lacunarity.intValue, 1, 12);
+        int lacunarityV = EditorGUILayout.IntSlider("Lacunarity", lacunarity.intValue, 1, 12);
         if (EditorGUI.EndChangeCheck())
         {
             lacunarity.intValue = lacunarityV;
@@ -163,7 +161,7 @@ public class WaterShaderGUI : ShaderGUI
         float h = editor.GetPropertyHeight(lacunarity);
 
         waveNumSelection = (WaveNumber)EditorGUILayout.EnumPopup(MakeLabel("Wave Number"), waveNumSelection);
-        
+
         if (waveNumSelection == WaveNumber.Runtime)
         {
             target.EnableKeyword("DYNAMIC_WAVE_NUM");
@@ -185,7 +183,7 @@ public class WaterShaderGUI : ShaderGUI
     {
         MaterialProperty dt = FindProperty("_DebugTime");
         EditorGUI.BeginChangeCheck();
-        float debugTime = EditorGUILayout.Slider("Wave Progression",dt.vectorValue.x,1f,1000f);
+        float debugTime = EditorGUILayout.Slider("Wave Progression", dt.vectorValue.x, 1f, 1000f);
         if (EditorGUI.EndChangeCheck())
         {
             dt.floatValue = debugTime;
@@ -199,16 +197,26 @@ public class WaterShaderGUI : ShaderGUI
         return FindProperty(name, properties);
     }
 
-    GUIContent MakeLabel (
-		MaterialProperty property, string tooltip = null
-	) {
-		staticLabel.text = property.displayName;
-		staticLabel.tooltip = tooltip;
-		return staticLabel;
-	}
-    GUIContent MakeLabel (string text, string tooltip = null) {
-		staticLabel.text = text;
-		staticLabel.tooltip = tooltip;
-		return staticLabel;
-	}
+    protected GUIContent MakeLabel(
+        MaterialProperty property, string tooltip = null
+    )
+    {
+        staticLabel.text = property.displayName;
+        staticLabel.tooltip = tooltip;
+        return staticLabel;
+    }
+    protected GUIContent MakeLabel(string text, string tooltip = null)
+    {
+        staticLabel.text = text;
+        staticLabel.tooltip = tooltip;
+        return staticLabel;
+    }
+
+    protected void ShowDefaultUI(string[] ps) {
+        foreach (var p in ps)
+        {
+            MaterialProperty m = FindProperty(p);
+            editor.DefaultShaderProperty(m, m.displayName);
+        }
+    }
 }

@@ -16,7 +16,7 @@ float3 BlinnPhongDiffuse(float3 wPos, float3 wNormal, float3 diffuseColor, float
     wNormal = normalize(wNormal);
     float diffuseStrength = DotClamped(wNormal, lDir);
 	#ifdef POINT
-        float3 diffuse = diffuseStrength * diffuseColor * lightColor * (lightIntensity / len(lightWorldPos - wPos));
+        float3 diffuse = diffuseStrength * diffuseColor * lightColor * (lightIntensity / length(lightWorldPos - wPos));
 	#elif defined(DIRECTIONAL)
         float3 diffuse = diffuseStrength * diffuseColor * lightColor;
     #else
@@ -45,7 +45,7 @@ float3 BlinnPhongSpecular(float3 wPos, float3 wNormal, float3 lDir, float3 light
     float NdL = DotClamped(wNormal, lDir);
 	float specularStrength = pow(NdH, specularSharpness ) * NdL;
 	#if defined(POINT) 
-		float3 specular = specularStrength * specularColor * lightColor * lightIntensity / len(lightWorldPos - wPos);
+		float3 specular = specularStrength * specularColor * lightColor * lightIntensity / length(lightWorldPos - wPos);
 	#elif defined(DIRECTIONAL)
 		float3 specular = specularStrength * specularColor * lightColor;
     #else
@@ -77,7 +77,7 @@ float3 BlinnPhongSpecularFromCubemap(float3 wPos, float3 wNormal, float3 lDir, f
     r.y = abs(r.y);
     float3 specularColor = specularTint * texCUBE(cubemap,r );
 	#if defined(POINT) 
-		float3 specular = 10 * specularStrength * specularColor * lightColor * lightIntensity / len(lightWorldPos - wPos);
+		float3 specular = 10 * specularStrength * specularColor * lightColor * lightIntensity / length(lightWorldPos - wPos);
 	#elif defined(DIRECTIONAL)
 		float3 specular = 10 * specularStrength * specularColor * lightColor;
     #else
