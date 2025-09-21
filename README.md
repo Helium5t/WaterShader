@@ -45,7 +45,7 @@ Two shaders are present, one uses classic vertex and fragments shaders to animat
  - `Tessellation at Edge Maximum` : Angle for maximum tesselation (if 1 view direction must be perpendicular to normal) in Height function based tessellation.
  - `Phong Tesselation Factor` : Factor for Unity's automatic Phong tessellation factor (might not work on some platforms).
 
- ### Height Function Tessellation ###
+ ### Height Function Based Tessellation ###
  The formula being used is the following:
 
  $$ T = Nyq(p1,p2) \cdot SchlickFresnel(\vec{V}, \vec{N})^{Max}_{Min} \cdot \frac{|p1-p2| - minDist}{maxDist-minDist} \cdot S$$
