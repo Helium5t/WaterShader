@@ -51,12 +51,14 @@ Two shaders are present, one uses classic vertex and fragments shaders to animat
  $$ T = Nyq(p1,p2) \cdot SchlickFresnel(\vec{V}, \vec{N})^{Max}_{Min} \cdot \frac{|p1-p2| - minDist}{maxDist-minDist} \cdot S$$
 
  Where:
- 
+
  $$ \begin{aligned}
 & \vec{V} = \text{World Space View Direction} \\ 
 & \vec{N} = \text{World Space Normal} \\ 
 & S = \text{Tessellation Subdivisions} \\
 & Nyq(x,y) = 2 * (f * f_r^4) * |p_1^{world}-p_2^{world}| \\
+& f = base frequency \\
+& f_r^n = \text{n-th power of the frequency ramp}\\\  
 & SchlickFresnel(x,y) = (1-\vec{X}\cdot\vec{Y})^5 \\
 & X^{Max}_{Min} = clamp(X,Min,Max) \\
 \end{aligned} $$
